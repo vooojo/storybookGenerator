@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Storybook Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .file-upload {
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-label {
+            color: #667eea;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .preview-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .preview-images img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #667eea;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Storybook Generator</h1>
+        <p class="subtitle">Create personalized illustrated storybooks powered by AI</p>
+        
+        <form id="storybookForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Character Name *</label>
+                <input type="text" id="name" name="name" required placeholder="e.g., Akito">
+            </div>
+
+            <div class="form-group">
+                <label for="age">Age (optional)</label>
+                <input type="number" id="age" name="age" placeholder="e.g., 18">
+            </div>
+
+            <div class="form-group">
+                <label for="interests">Interests & Personality (optional)</label>
+                <textarea id="interests" name="interests" placeholder="e.g., loves adventure, enjoys reading, creative thinker"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="theme">Story Theme *</label>
+                <textarea id="theme" name="theme" required placeholder="e.g., Moving out of parents' house and starting college life"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="art_style">Art Style</label>
+                <select id="art_style" name="art_style">
+                    <option value="anime art style">Anime</option>
+                    <option value="watercolor illustration">Watercolor</option>
+                    <option value="digital art illustration">Digital Art</option>
+                    <option value="cartoon illustration">Cartoon</option>
+                    <option value="realistic illustration">Realistic</option>
+                    <option value="storybook illustration">Classic Storybook</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Upload Photos (optional)</label>
+                <div class="file-upload" onclick="document.getElementById('photos').click()">
+                    <input type="file" id="photos" name="photos" multiple accept="image/*">
+                    <div class="file-upload-label">📷 Click to upload photos</div>
+                    <div class="file-info">Upload 1-5 photos to help AI understand the character's appearance</div>
+                </div>
+                <div class="preview-images" id="previewImages"></div>
+            </div>
+
+            <button type="submit" id="generateBtn">Generate Storybook</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Creating your magical storybook... This may take a minute.</div>
+        </div>
+    </div>
+
+    <script>
+        const photosInput = document.getElementById('photos');
+        const previewImages = document.getElementById('previewImages');
+        const form = document.getElementById('storybookForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const loading = document.getElementById('loading');
+
+        photosInput.addEventListener('change', function(e) {
+            previewImages.innerHTML = '';
+            const files = Array.from(e.target.files).slice(0, 5);
+            
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    previewImages.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            generateBtn.disabled = true;
+            loading.classList.add('active');
+            
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = `/storybook/${data.storybook_id}`;
+                } else {
+                    alert('Error generating storybook: ' + (data.error || 'Unknown error'));
+                    generateBtn.disabled = false;
+                    loading.classList.remove('active');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                generateBtn.disabled = false;
+                loading.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

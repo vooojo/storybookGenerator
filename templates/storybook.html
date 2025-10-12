@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ storybook.info.name }}'s Storybook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+
+        .header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .storybook-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .book-viewer {
+            max-width: 1400px;
+            width: 100%;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .page {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            flex: 1;
+            max-width: 600px;
+            display: none;
+            flex-direction: column;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        .page-image {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .page-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .page-text {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            color: #1a1a1a;
+            font-size: 20px;
+            line-height: 1.8;
+            text-align: left;
+        }
+
+        .page-text p {
+            max-width: 500px;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .controls {
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-indicator {
+            color: #999;
+            font-size: 16px;
+        }
+
+        .loading-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .book-viewer {
+                flex-direction: column;
+                max-width: 500px;
+            }
+
+            .page {
+                max-width: 100%;
+            }
+
+            .page-text {
+                padding: 40px 30px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ storybook.info.name }}'s Storybook</h1>
+        <a href="/" class="back-btn">Create New Story</a>
+    </div>
+
+    <div class="storybook-container">
+        <div class="book-viewer" id="bookViewer">
+            {% for page in storybook.pages %}
+            <div class="page {% if loop.index <= 2 %}active{% endif %}" data-page="{{ page.page }}">
+                {% if page.type == 'image' %}
+                <div class="page-image">
+                    {% if page.image_url %}
+                    <img src="{{ page.image_url }}" alt="Page {{ page.page }}">
+                    {% else %}
+                    <div class="loading-image">
+                        <div class="spinner"></div>
+                        <div>Generating image...</div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="page-number">{{ page.page }}</div>
+                {% else %}
+                <div class="page-text">
+                    <p>{{ page.content }}</p>
+                </div>
+                <div class="page-number">{{ page.page }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="nav-btn" id="prevBtn" onclick="previousPage()">← Previous</button>
+        <div class="page-indicator">
+            <span id="currentPage">1-2</span> / {{ storybook.pages|length }}
+        </div>
+        <button class="nav-btn" id="nextBtn" onclick="nextPage()">Next →</button>
+    </div>
+
+    <script>
+        let currentPageIndex = 0;
+        const pages = document.querySelectorAll('.page');
+        const totalPages = pages.length;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentPageEl = document.getElementById('currentPage');
+
+        function showPages(index) {
+            pages.forEach(page => page.classList.remove('active'));
+            
+            if (index < totalPages) {
+                pages[index].classList.add('active');
+            }
+            if (index + 1 < totalPages) {
+                pages[index + 1].classList.add('active');
+            }
+            
+            updateControls();
+        }
+
+        function updateControls() {
+            prevBtn.disabled = currentPageIndex === 0;
+            nextBtn.disabled = currentPageIndex >= totalPages - 2;
+            
+            const leftPage = currentPageIndex + 1;
+            const rightPage = currentPageIndex + 2;
+            
+            if (rightPage <= totalPages) {
+                currentPageEl.textContent = `${leftPage}-${rightPage}`;
+            } else {
+                currentPageEl.textContent = `${leftPage}`;
+            }
+        }
+
+        function nextPage() {
+            if (currentPageIndex < totalPages - 2) {
+                currentPageIndex += 2;
+                showPages(currentPageIndex);
+            }
+        }
+
+        function previousPage() {
+            if (currentPageIndex >= 2) {
+                currentPageIndex -= 2;
+                showPages(currentPageIndex);
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                previousPage();
+            } else if (e.key === 'ArrowRight') {
+                nextPage();
+            }
+        });
+
+        showPages(currentPageIndex);
+    </script>
+</body>
+</html>
